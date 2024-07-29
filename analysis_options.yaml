@@ -1,0 +1,12 @@
+# include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    avoid_equals_and_hash_code_on_mutable_classes: ignore
+    lines_longer_than_80_chars: ignore
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    public_member_api_docs: false
+    avoid_dynamic_calls: false
