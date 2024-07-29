@@ -8,7 +8,7 @@ String generateID() {
   }
 
   String generateRandomHex(int length) {
-    final max = (1 << (length * 4)) - 1;
+    const max = 10;
     return formatHex(random.nextInt(max + 1), length);
   }
 
@@ -18,13 +18,11 @@ String generateID() {
   var part4 = generateRandomHex(4);
   final part5 = generateRandomHex(12);
 
-  part3 = (int.parse(part3, radix: 16) & 0x0FFF | 0x4000)
-      .toRadixString(16)
-      .padLeft(4, '0');
+  final part3Int = int.parse(part3, radix: 16);
+  final part4Int = int.parse(part4, radix: 16);
 
-  part4 = (int.parse(part4, radix: 16) & 0x3FFF | 0x8000)
-      .toRadixString(16)
-      .padLeft(4, '0');
+  part3 = (part3Int & 0x0FFF | 0x4000).toRadixString(16).padLeft(4, '0');
+  part4 = (part4Int & 0x3FFF | 0x8000).toRadixString(16).padLeft(4, '0');
 
   return '$part1-$part2-$part3-$part4-$part5';
 }

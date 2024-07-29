@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_item_tracker/app.dart';
-import 'package:flutter_item_tracker/src/items_list/item_view.dart';
 import 'package:flutter_item_tracker/src/items_list/items_provider.dart';
 import 'package:flutter_item_tracker/src/items_list/items_repo.dart';
 import 'package:provider/provider.dart';
