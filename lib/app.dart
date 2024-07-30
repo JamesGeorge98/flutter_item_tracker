@@ -17,7 +17,9 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    context.read<ItemsRepository>().loadInitailData();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) => context.read<ItemsRepository>().loadInitailData(),
+    );
   }
 
   @override

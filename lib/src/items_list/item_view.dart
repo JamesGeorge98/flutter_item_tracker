@@ -13,6 +13,40 @@ class ItemView extends StatefulWidget {
 }
 
 class _ItemViewState extends State<ItemView> {
+  final List<GlobalKey> currentPostionKey = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) => context.read<ItemsProvider>().getItems(),
+    );
+  }
+
+  double getWidgetPosition(int index) {
+    final renderObject = currentPostionKey[index]
+        .currentContext
+        ?.findRenderObject() as RenderBox?;
+    if (renderObject != null) {
+      final itemBox = renderObject;
+      return itemBox.localToGlobal(Offset.zero).dy;
+    }
+
+    return 0;
+  }
+
+  double getWidgetSize(int index) {
+    final renderObject = currentPostionKey[index]
+        .currentContext
+        ?.findRenderObject() as RenderBox?;
+    if (renderObject != null) {
+      final itemBox = renderObject.size;
+      return itemBox.width;
+    }
+
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,36 +59,77 @@ class _ItemViewState extends State<ItemView> {
   }
 
   Widget builder() {
-    return FutureBuilder(
-      future: context.read<ItemsProvider>().getItems(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final data = snapshot.data ?? [];
-        if (data.isEmpty) {
-          return const Center(
-            child: Text('Add some items'),
+    return Consumer<ItemsProvider>(
+      builder: (context, value, child) {
+        currentPostionKey
+          ..clear()
+          ..addAll(
+            List.generate(value.itemsList.length, (index) => GlobalKey()),
           );
-        }
-        return listView(data);
+        return value.isLoading
+            ? const CircularProgressIndicator()
+            : listView(value.itemsList);
       },
     );
   }
 
   Widget listView(List<ItemsModel> data) {
-    return ListView.builder(
+    if (data.isEmpty) {
+      return const Center(
+        child: Text('Add Items'),
+      );
+    }
+
+    return ListView.separated(
       shrinkWrap: true,
       itemCount: data.length,
-      itemBuilder: (context, index) => list(data[index]),
+      itemBuilder: (context, index) => list(data[index], index),
+      separatorBuilder: (context, index) => const SizedBox(
+        height: 10,
+      ),
     );
   }
 
-  Widget list(ItemsModel model) {
-    return ListTile(
-      tileColor: Colors.white,
-      title: Text(model.name ?? 'Name'),
-      subtitle: Text(model.desc ?? 'Desc'),
+  Widget list(ItemsModel model, int index) {
+    final position = ValueNotifier<double>(0);
+    final size = ValueNotifier<double>(0);
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      position.value = getWidgetPosition(index);
+      size.value = getWidgetSize(index);
+    });
+    return SizedBox(
+      width: index.isEven ? 200 : double.infinity,
+      child: ListTile(
+        key: currentPostionKey[index],
+        tileColor: Colors.white,
+        
+        title: Text(model.name ?? 'Name'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(model.desc ?? 'Desc'),
+            ValueListenableBuilder(
+              valueListenable: position,
+              builder: (context, value, child) =>
+                  Text('Position : ${position.value}'),
+            ),
+            ValueListenableBuilder(
+              valueListenable: size,
+              builder: (context, value, child) => Text('size : ${size.value}'),
+            ),
+          ],
+        ),
+        isThreeLine: true,
+        trailing: IconButton(
+          onPressed: () {
+            if (model.id != null && model.id != '') {
+              context.read<ItemsProvider>().removeItem(id: model.id!);
+            }
+          },
+          icon: const Icon(Icons.delete),
+        ),
+      ),
     );
   }
 
@@ -84,7 +159,14 @@ class _ItemViewState extends State<ItemView> {
     }
 
     showModalBottomSheet<Widget>(
+      isScrollControlled: true,
       context: context,
+      anchorPoint: const Offset(0, 0.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
       builder: (context) => const ItemForm(),
     );
   }

@@ -23,4 +23,13 @@ class ItemsRepository {
           'id': generateID(),
         },
       ];
+
+  Future<List<ItemsModel>> fetchItems() async {
+    try {
+      await Future<void>.delayed(Duration.zero);
+      return _itemsList;
+    } catch (e) {
+      throw Exception('Error while fetcing data');
+    }
+  }
 }

@@ -25,7 +25,7 @@ class ProviderInjection extends StatelessWidget {
             create: (context) =>
                 ItemsProvider(itemsRepository: context.read<ItemsRepository>()),
           ),
-        ],
+        ], 
         child: const App(),
       ),
     );
