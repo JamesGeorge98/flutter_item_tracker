@@ -13,12 +13,12 @@ class ItemsRepository {
 
   List<JSON> get _initialData => <JSON>[
         {
-          'name': 'james',
+          'name': 'usser1',
           'desc': 'frontend developer',
           'id': generateID(),
         },
         {
-          'name': 'komal',
+          'name': 'user2',
           'desc': 'backend developer',
           'id': generateID(),
         },

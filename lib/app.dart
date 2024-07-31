@@ -26,6 +26,8 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     const title = kIsWeb ? 'Item Tracker Web' : 'Item Tracker';
     return const MaterialApp(
+      // debugShowMaterialGrid: true,
+
       debugShowCheckedModeBanner: false,
       title: title,
       home: ItemView(),

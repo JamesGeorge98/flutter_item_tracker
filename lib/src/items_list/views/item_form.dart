@@ -5,7 +5,9 @@ import 'package:flutter_item_tracker/src/widgets/gap.dart';
 import 'package:provider/provider.dart';
 
 class ItemForm extends StatefulWidget {
-  const ItemForm({super.key});
+  const ItemForm({super.key, this.itemsModel});
+
+  final ItemsModel? itemsModel;
 
   @override
   State<ItemForm> createState() => _ItemFormState();
@@ -15,11 +17,18 @@ class _ItemFormState extends State<ItemForm> {
   late final TextEditingController nameController;
   late final TextEditingController descController;
 
+  late final itemsModel = widget.itemsModel;
+
   @override
   void initState() {
     super.initState();
     nameController = TextEditingController();
     descController = TextEditingController();
+
+    if (itemsModel != null) {
+      nameController.text = itemsModel?.name ?? 'name';
+      descController.text = itemsModel?.desc ?? 'name';
+    }
   }
 
   @override
@@ -58,8 +67,9 @@ class _ItemFormState extends State<ItemForm> {
                   final model = ItemsModel(
                     name: nameController.text,
                     desc: descController.text,
+                    id: itemsModel?.id,
                   );
-                  await context.read<ItemsProvider>().addItems(model: model);
+                  await context.read<ItemsProvider>().putItems(model: model);
                   if (context.mounted) {
                     Navigator.pop(context);
                   }

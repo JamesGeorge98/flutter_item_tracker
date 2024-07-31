@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_item_tracker/src/items_list/items_model.dart';
 import 'package:flutter_item_tracker/src/items_list/items_provider.dart';
 import 'package:flutter_item_tracker/src/items_list/views/item_form.dart';
+import 'package:flutter_item_tracker/src/widgets/gap.dart';
 import 'package:provider/provider.dart';
 
 class ItemView extends StatefulWidget {
@@ -80,12 +81,15 @@ class _ItemViewState extends State<ItemView> {
       );
     }
 
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: data.length,
-      itemBuilder: (context, index) => list(data[index], index),
-      separatorBuilder: (context, index) => const SizedBox(
-        height: 10,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: data.length,
+        itemBuilder: (context, index) => list(data[index], index),
+        separatorBuilder: (context, index) => const SizedBox(
+          height: 10,
+        ),
       ),
     );
   }
@@ -94,41 +98,69 @@ class _ItemViewState extends State<ItemView> {
     final position = ValueNotifier<double>(0);
     final size = ValueNotifier<double>(0);
 
+    const style = TextStyle(
+      color: Color.fromARGB(255, 104, 103, 103),
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       position.value = getWidgetPosition(index);
       size.value = getWidgetSize(index);
     });
-    return SizedBox(
-      width: index.isEven ? 200 : double.infinity,
-      child: ListTile(
-        key: currentPostionKey[index],
-        tileColor: Colors.white,
-        
-        title: Text(model.name ?? 'Name'),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(model.desc ?? 'Desc'),
-            ValueListenableBuilder(
-              valueListenable: position,
-              builder: (context, value, child) =>
-                  Text('Position : ${position.value}'),
-            ),
-            ValueListenableBuilder(
-              valueListenable: size,
-              builder: (context, value, child) => Text('size : ${size.value}'),
-            ),
-          ],
-        ),
-        isThreeLine: true,
-        trailing: IconButton(
-          onPressed: () {
-            if (model.id != null && model.id != '') {
-              context.read<ItemsProvider>().removeItem(id: model.id!);
-            }
-          },
-          icon: const Icon(Icons.delete),
-        ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 10, 10, 10),
+      key: currentPostionKey[index],
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey),
+      ),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(model.name ?? 'Name'),
+              Text(
+                model.desc ?? 'Desc',
+                style: style,
+              ),
+              ValueListenableBuilder(
+                valueListenable: position,
+                builder: (context, value, child) => Text(
+                  'Position : ${position.value}',
+                  style: style,
+                ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: size,
+                builder: (context, value, child) => Text(
+                  'size : ${size.value}',
+                  style: style,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: () {
+                  if (model.id != null && model.id != '') {
+                    context.read<ItemsProvider>().removeItem(id: model.id!);
+                  }
+                },
+                child: const Icon(Icons.delete),
+              ),
+              const Gap(40),
+              InkWell(
+                onTap: () {
+                  openForm(model);
+                },
+                child: const Icon(Icons.edit),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -140,7 +172,7 @@ class _ItemViewState extends State<ItemView> {
     );
   }
 
-  void openForm() {
+  void openForm([ItemsModel? model]) {
     var width = 300.0;
     if (context.size != null) {
       width = context.size!.width * 0.4;
@@ -151,7 +183,7 @@ class _ItemViewState extends State<ItemView> {
         builder: (context) => AlertDialog(
           content: SizedBox(
             width: width,
-            child: const ItemForm(),
+            child: ItemForm(itemsModel: model),
           ),
         ),
       );
@@ -167,7 +199,7 @@ class _ItemViewState extends State<ItemView> {
           top: Radius.circular(20),
         ),
       ),
-      builder: (context) => const ItemForm(),
+      builder: (context) => ItemForm(itemsModel: model),
     );
   }
 }

@@ -16,7 +16,6 @@ class ItemsProvider extends BaseProvider {
       setLoader();
       await Future<void>.delayed(Duration.zero);
       final data = await _itemsRepository.fetchItems();
-      print(data);
       itemsList
         ..clear()
         ..addAll(data);
@@ -27,11 +26,18 @@ class ItemsProvider extends BaseProvider {
     }
   }
 
-  Future<void> addItems({required ItemsModel model}) async {
+  Future<void> putItems({required ItemsModel model}) async {
     try {
       model.id ??= generateID();
       await Future<void>.delayed(Duration.zero);
-      _itemsRepository.itemsList.add(model);
+      if (_itemsRepository.itemsList.contains(model)) {
+        final index = _itemsRepository.itemsList.indexWhere(
+          (element) => element.id == model.id,
+        );
+        _itemsRepository.itemsList[index] = model;
+      } else {
+        _itemsRepository.itemsList.add(model);
+      }
     } catch (e) {
       throw Exception('Error while adding data');
     } finally {
